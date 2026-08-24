@@ -1,0 +1,15 @@
+/target
+/vendor
+/.claude/settings.local.json
+
+.env*
+.envrc
+.netrc
+*.pem
+*.key
+*.p8
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+credentials.json
