@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ipv4",
+  "description": "IPv4 configuration. Validated when the state carries an 'ipv4' sub-object.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "addresses": {
+      "type": "array",
+      "x-netfyr-writable": true,
+      "description": "IPv4 addresses in order; the first is the primary source address.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ip"],
+        "properties": {
+          "ip": {
+            "type": "string",
+            "format": "ipv4-cidr",
+            "x-netfyr-writable": true,
+            "description": "Address with prefix length (CIDR)."
+          },
+          "valid_lft": {
+            "type": "integer",
+            "x-netfyr-writable": true,
+            "description": "Address validity lifetime in seconds."
+          },
+          "preferred_lft": {
+            "type": "integer",
+            "x-netfyr-writable": true,
+            "description": "Address preferred lifetime in seconds."
+          }
+        }
+      }
+    }
+  }
+}

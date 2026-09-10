@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "base",
+  "description": "Fields common to every netfyr network device. Always validated.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Technology type (e.g. \"ethernet\")."
+    },
+    "name": {
+      "type": "string",
+      "description": "Interface name."
+    },
+    "mac": {
+      "type": "string",
+      "description": "Hardware MAC address."
+    },
+    "carrier": {
+      "type": "boolean",
+      "description": "Whether the link has carrier."
+    },
+    "driver": {
+      "type": "string",
+      "description": "Kernel driver."
+    },
+    "enabled": {
+      "type": "boolean",
+      "x-netfyr-writable": true,
+      "description": "Admin up/down."
+    },
+    "mtu": {
+      "type": "integer",
+      "x-netfyr-writable": true,
+      "minimum": 68,
+      "maximum": 65535,
+      "description": "Maximum transmission unit in bytes."
+    }
+  }
+}

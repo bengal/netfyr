@@ -11,9 +11,9 @@ use indexmap::IndexMap;
 /// variant here: they are parse errors, since the spec does not represent
 /// them (quote such a value to store it as a string).
 ///
-/// The IP variants are semantic model types. A schema-directed codec decides
-/// whether a YAML field uses one of them; the model itself never guesses from
-/// the text of a string.
+/// YAML represents IP values as strings. The schema-directed codec selects
+/// these variants only for property paths whose declared semantic format
+/// requires them; ordinary string fields preserve IP-looking text exactly.
 #[derive(Clone, Debug)]
 pub enum Value {
     /// A string.
@@ -113,7 +113,6 @@ mod tests {
     use indexmap::IndexMap;
 
     use crate::Value;
-
     fn ip(s: &str) -> IpAddr {
         s.parse().unwrap()
     }
