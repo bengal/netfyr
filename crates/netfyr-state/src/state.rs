@@ -8,8 +8,8 @@ use crate::match_spec::Match;
 use crate::source::Source;
 use crate::value::Value;
 
-/// Runtime-only bookkeeping for a [`State`]. The schema-directed codec
-/// creates a fresh instance for each decoded state.
+/// Runtime-only bookkeeping for a [`State`]. Never part of the YAML format:
+/// a fresh instance is created on every deserialization.
 #[derive(Clone, Debug)]
 pub struct StateMetadata {
     /// A unique in-memory handle, generated as a UUIDv7.
@@ -50,8 +50,10 @@ impl StateMetadata {
 /// timestamp. Compare non-runtime model content with [`State::content_eq`].
 #[derive(Clone, Debug)]
 pub struct State {
-    /// The technology type of the device (e.g. `"ethernet"`). Empty for a
-    /// desired-state contribution that has no type constraint.
+    /// The technology type of the device (e.g. `"ethernet"`). Empty for
+    /// desired-state contributions that neither set `type:` nor carry a
+    /// technology sub-object. The model does not distinguish an explicit
+    /// `type:` from one inferred from a technology sub-object.
     pub device_type: String,
     /// Which device this state targets.
     pub match_spec: Match,
@@ -232,8 +234,8 @@ mod tests {
 
     #[test]
     fn content_eq_false_on_field_order() {
-        // Load-bearing pin: same pairs in different insertion order are NOT
-        // equal content (IndexMap::PartialEq would say they are; content_eq
+        // Same pairs in different insertion order are NOT equal content
+        // (IndexMap::PartialEq would say they are; content_eq
         // must not).
         let mut a = IndexMap::new();
         a.insert("first".to_string(), Value::U64(1));

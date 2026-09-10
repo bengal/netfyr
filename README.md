@@ -6,6 +6,10 @@ You describe the network state you want in YAML. netfyr reads the current state 
 the kernel, works out the difference, and applies it over netlink. The query and apply
 paths need no daemon.
 
+YAML values are decoded using the embedded schema at each property path. For
+example, an address-looking interface name remains a string, while an
+`ipv4.addresses[].ip` value uses the declared CIDR format.
+
 Work here is driven spec by spec from
 [netfyr/specs](https://github.com/netfyr/specs).
 
@@ -19,9 +23,9 @@ make test TAGS=ipv4,routing    # integration tests tagged ipv4 OR routing
 make test TAGS=ipv4+routing    # integration tests tagged ipv4 AND routing
 ```
 
-The workspace's first crate is `netfyr-state`, a library defining the shared state
-model. The shell suite under `make test` will exercise the CLI once a later story
-lands one.
+The workspace's first crate is `netfyr-state`, a library, so `cargo test` runs its
+unit tests now; the shell suite under `make test` will exercise the CLI once a later
+story lands one.
 
 ## License
 

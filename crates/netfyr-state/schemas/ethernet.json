@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ethernet",
+  "description": "Ethernet link properties. Validated when the state carries an 'ethernet' sub-object.",
+  "x-netfyr-device-type": "ethernet",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "speed": {
+      "type": "integer",
+      "description": "Link speed in Mbps."
+    },
+    "duplex": {
+      "type": "string",
+      "enum": ["full", "half", "unknown"],
+      "description": "Link duplex mode."
+    },
+    "autoneg": {
+      "type": "boolean",
+      "description": "Whether auto-negotiation is enabled."
+    }
+  }
+}

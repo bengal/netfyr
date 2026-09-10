@@ -10,3 +10,6 @@ infrastructure, and contributor tooling do not appear here; the commit log and t
 they name carry that history.
 
 ## [Unreleased]
+
+- Decode YAML values from their schema path instead of globally inferring IP
+  types from string contents (core/002-schema-validation).
