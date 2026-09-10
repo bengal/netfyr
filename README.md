@@ -19,8 +19,9 @@ make test TAGS=ipv4,routing    # integration tests tagged ipv4 OR routing
 make test TAGS=ipv4+routing    # integration tests tagged ipv4 AND routing
 ```
 
-The workspace has no crates yet, so the cargo commands exit 101 until the first spec
-lands one. See [CONTRIBUTING.md](CONTRIBUTING.md).
+The workspace's first crate is `netfyr-state`, a library defining the shared state
+model. The shell suite under `make test` will exercise the CLI once a later story
+lands one.
 
 ## License
 

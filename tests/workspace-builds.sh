@@ -21,11 +21,4 @@ sed -n '/^\[workspace\]/,/^\[/p' "$manifest" \
     exit 1
 }
 
-# cargo build refuses to run while members is empty, so the manifest checks above are
-# all there is to assert. Delete this branch once a crate lands.
-if [[ "$metadata" == *'"workspace_members":[]'* ]]; then
-    echo "note: workspace has no members, checked the manifest only"
-    exit 0
-fi
-
 (cd "$repo_root" && cargo build) || { echo "FAIL: cargo build failed" >&2; exit 1; }
