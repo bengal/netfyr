@@ -45,15 +45,8 @@ esac
 target_dir="${metadata#*\"target_directory\":\"}"
 export NETFYR_TARGET_DIR="${target_dir%%\"*}"
 
-# cargo build errors on a member-less virtual manifest rather than doing nothing, and
-# cargo metadata is what still answers while that is true. Delete this branch once
-# members is non-empty.
 if [ "$skip_build" != "1" ]; then
-    if [[ "$metadata" == *'"workspace_members":[]'* ]]; then
-        echo "note: workspace has no members yet, skipping cargo build"
-    else
-        (cd "$repo_root" && cargo build) || { echo "FAIL: cargo build failed" >&2; exit 1; }
-    fi
+    (cd "$repo_root" && cargo build) || { echo "FAIL: cargo build failed" >&2; exit 1; }
 fi
 
 read_tags() {

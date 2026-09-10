@@ -32,24 +32,6 @@ before pushes that do. A commit touching only docs or shell runs neither. An exi
 hook of the same type is preserved as `<hook>.legacy` and still runs; hooks of other
 types, `commit-msg` included, are left alone.
 
-### The empty workspace
-
-Until the first crate lands, cargo refuses to run at all:
-
-```
-error: manifest path `...` contains no package: The manifest is virtual, and the
-workspace has no members.
-```
-
-`cargo build`, `cargo check`, `cargo test`, and `cargo clippy` all exit 101, so `make
-clippy` fails too. `make fmt` fails differently: `cargo fmt` finds no targets and exits 1.
-Cargo is declining a no-op here, not reporting a broken checkout, but the cargo-backed
-commands are unusable until a crate lands. `make test` is the exception: the runner
-detects the empty workspace and skips the build step.
-
-That handling is temporary. Once `members` is non-empty, delete the empty-workspace
-branches in `scripts/run-tests.sh` and `tests/workspace-builds.sh`.
-
 ## Code conventions
 
 Rust 2024 edition. Code is formatted with `cargo fmt` and must be clippy-clean.
