@@ -226,10 +226,7 @@ impl fmt::Display for ValidationError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ValidationError::UnknownField { fragment, path } => {
-                write!(
-                    f,
-                    "unknown field '{path}' in the '{fragment}' fragment"
-                )
+                write!(f, "unknown field '{path}' in the '{fragment}' fragment")
             }
             ValidationError::ReadOnlyField { fragment, path } => write!(
                 f,
@@ -396,6 +393,58 @@ impl SchemaRegistry {
             Self::parse_fragment("ethernet", ETHERNET_JSON, Some("ethernet")),
         ];
         Self { fragments }
+    }
+
+    /// Add a schema node below an existing fragment root.
+    ///
+    /// Missing intermediate properties are created as writable closed objects.
+    /// This composes extension-owned schema into the same decoder and validator
+    /// used by the built-in state fragments.
+    pub fn add_schema_node(
+        &mut self,
+        fragment: &str,
+        path: &str,
+        json: &str,
+    ) -> Result<(), String> {
+        let node: SchemaNode = serde_json::from_str(json)
+            .map_err(|err| format!("schema node at '{path}' is malformed: {err}"))?;
+        validate_schema_node(&node);
+        let parts: Vec<&str> = path.split('.').collect();
+        if parts.is_empty() || parts.iter().any(|part| part.is_empty()) {
+            return Err(
+                "schema node path must not be empty or contain empty components".to_string(),
+            );
+        }
+        let fragment = self
+            .fragments
+            .iter_mut()
+            .find(|candidate| candidate.name == fragment)
+            .ok_or_else(|| format!("unknown schema fragment '{fragment}'"))?;
+        let mut parent = &mut fragment.root;
+        for part in &parts[..parts.len() - 1] {
+            parent = parent
+                .properties
+                .get_or_insert_with(IndexMap::new)
+                .entry((*part).to_string())
+                .or_insert_with(writable_object);
+            if parent.r#type != Some(FieldType::Object) {
+                return Err(format!("schema path component '{part}' is not an object"));
+            }
+        }
+        let properties = parent.properties.get_or_insert_with(IndexMap::new);
+        let name = parts
+            .last()
+            .expect("non-empty path was checked")
+            .to_string();
+        if properties.contains_key(&name) {
+            return Err(format!("schema node '{path}' already exists"));
+        }
+        properties.insert(name, node);
+
+        fragment.fields.clear();
+        derive_fields(&fragment.root, "", &mut fragment.fields);
+        fragment.fields.sort_keys();
+        Ok(())
     }
 
     /// Decode YAML directly into model values using this registry's schema
@@ -671,6 +720,22 @@ impl SchemaRegistry {
             }
         }
         errors
+    }
+}
+
+fn writable_object() -> SchemaNode {
+    SchemaNode {
+        r#type: Some(FieldType::Object),
+        format: None,
+        writable: true,
+        minimum: None,
+        maximum: None,
+        r#enum: None,
+        properties: Some(IndexMap::new()),
+        required: None,
+        items: None,
+        additional_properties: Some(false),
+        implied_device_type: None,
     }
 }
 
