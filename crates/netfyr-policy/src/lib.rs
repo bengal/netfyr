@@ -717,6 +717,18 @@ mod tests {
     }
 
     #[test]
+    fn provider_schemas_compose_without_conflict() {
+        // `schema_registry()` panics if a provider's `params_schema` is
+        // malformed or its dotted location collides with another schema
+        // node, so building it here asserts every registered provider
+        // schema is well-formed independent of any policy document.
+        let schemas = ProviderRegistry.schema_registry();
+        assert!(schemas.field_info("ipv4", "dhcp4.route-metric").is_some());
+        assert!(schemas.field_info("base", "ipv6.dhcp6").is_some());
+        assert!(schemas.field_info("base", "ipv6.ra").is_some());
+    }
+
+    #[test]
     fn explicit_policy_splits_static_fields_and_dhcp_parameters() {
         let outcome = load(
             "kind: policy\nname: office\nmatch:\n  name: eth0\npriority: 101\nmetadata:\n  managed-by: test\nmtu: 1500\nipv4:\n  addresses:\n    - ip: 192.0.2.10/24\n  dhcp4:\n    send-hostname: true\n    route-metric: 100\n",
