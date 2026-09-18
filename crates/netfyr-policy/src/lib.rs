@@ -296,12 +296,11 @@ impl Policy {
     }
 
     fn candidate_state(&self) -> State {
-        // `type` is policy structure, not a writable state field. It has
-        // already been decoded as a string, so validate the actual fields.
         let mut state = State::new(Source::Static {
             policy: self.name.clone(),
         });
         state.match_spec = self.match_spec.clone();
+        state.device_type = self.device_type.clone();
         state.fields = self.fields.clone();
         state
     }
@@ -590,9 +589,7 @@ fn policy_from_mapping(
 }
 
 fn validate_policy_state(state: &State, schemas: &SchemaRegistry) -> Result<(), PolicyError> {
-    let mut candidate = state.clone();
-    candidate.device_type.clear();
-    let errors = schemas.validate_writable(&candidate);
+    let errors = schemas.validate_writable(state);
     if errors.is_empty() {
         Ok(())
     } else {

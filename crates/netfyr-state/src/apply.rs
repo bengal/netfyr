@@ -359,7 +359,7 @@ mod tests {
     }
 
     #[test]
-    fn apply_rejects_malformed_cidr_and_explicit_policy_type() {
+    fn apply_rejects_malformed_cidr() {
         let malformed =
             from_yaml("match:\n  name: eth0\nipv4:\n  addresses:\n    - ip: 10.0.0.1/33\n")
                 .unwrap();
@@ -375,19 +375,14 @@ mod tests {
                 error: crate::ValidationError::InvalidFormat { .. },
             }]
         ));
+    }
 
+    #[test]
+    fn explicit_policy_type_is_structural_and_accepted() {
         let typed = from_yaml("match:\n  name: eth0\ntype: ethernet\nmtu: 1500\n").unwrap();
-        let Error::Validation(errors) = err_of(prepare_for_apply(&typed, &ApplyOptions::default()))
-        else {
-            panic!("expected schema validation error");
-        };
-        assert!(matches!(
-            errors.as_slice(),
-            [IndexedValidationError {
-                state_index: 0,
-                error: crate::ValidationError::ReadOnlyField { path, .. },
-            }] if path == "type"
-        ));
+        // `device_type` is structural metadata, not a writable field; it
+        // must not be rejected as read-only.
+        prepare_for_apply(&typed, &ApplyOptions::default()).unwrap();
     }
 
     #[test]

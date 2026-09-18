@@ -278,18 +278,14 @@ fn yaml_device_type_passes_query_validation_but_fails_writable_validation() {
     let state = &from_yaml("type: ethernet\nname: eth0\n").unwrap()[0];
     let reg = registry();
     assert!(reg.validate(state).is_empty());
+    // `device_type` is structural metadata and is not rejected as
+    // read-only; only `name` (a true read-only field) triggers an error.
     assert_eq!(
         reg.validate_writable(state),
-        vec![
-            ValidationError::ReadOnlyField {
-                fragment: "base",
-                path: "name".to_string(),
-            },
-            ValidationError::ReadOnlyField {
-                fragment: "base",
-                path: "type".to_string(),
-            },
-        ]
+        vec![ValidationError::ReadOnlyField {
+            fragment: "base",
+            path: "name".to_string(),
+        }]
     );
 }
 
@@ -354,17 +350,18 @@ fn query_result_with_read_only_fields_passes_validate() {
 }
 
 /// The same read-only fields are all rejected in writable mode. Every
-/// violation is collected, not just the first.
+/// violation is collected, not just the first.  `device_type` (`type`) is
+/// structural metadata and is intentionally exempt.
 #[test]
 fn all_read_only_fields_rejected_in_writable_mode() {
     let state = query_result_state();
     let errors = registry().validate_writable(&state);
     assert_eq!(
         errors.len(),
-        8,
-        "expected 5 base + 3 ethernet violations: {errors:?}"
+        7,
+        "expected 4 base + 3 ethernet violations: {errors:?}"
     );
-    for path in ["type", "name", "mac", "carrier", "driver"] {
+    for path in ["name", "mac", "carrier", "driver"] {
         assert!(
             has_read_only_field(&errors, "base", path),
             "missing ReadOnlyField for '{path}': {errors:?}"

@@ -694,11 +694,11 @@ impl SchemaRegistry {
                         writable_only,
                         &mut errors,
                     );
-                    // The model does not record whether this type was
-                    // explicit YAML or inferred from a technology fragment.
-                    // Current technology fields are read-only, so this does
-                    // not hide a writable policy; add origin tracking before
-                    // introducing writable technology-specific fields.
+                    // `device_type` is structural metadata carried by the
+                    // state model, not a field the policy writes to the
+                    // device.  Validate its value (must be a known string)
+                    // but never reject it as read-only: pass `false` for
+                    // the writable check regardless of the caller's mode.
                     if !state.device_type.is_empty() {
                         let type_node = fragment
                             .root
@@ -711,7 +711,7 @@ impl SchemaRegistry {
                             &Value::String(state.device_type.clone()),
                             "type",
                             fragment.name,
-                            writable_only,
+                            false,
                             &mut errors,
                         );
                     }
