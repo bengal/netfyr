@@ -248,6 +248,7 @@ impl Policy {
                 continue;
             };
             let keys: Vec<String> = values.keys().cloned().collect();
+            let mut removed_any = false;
             for key in keys {
                 let Some(registration) = registry.registration(&domain, &key) else {
                     continue;
@@ -258,6 +259,7 @@ impl Policy {
                 else {
                     unreachable!("validated trigger is a parameter map");
                 };
+                removed_any = true;
                 providers.push(ProviderDecl {
                     kind: registration.kind.to_string(),
                     source: registration.source,
@@ -269,7 +271,7 @@ impl Policy {
                     device_type: self.device_type.clone(),
                 });
             }
-            if values.is_empty() {
+            if removed_any && values.is_empty() {
                 fields.shift_remove(&domain);
             }
         }
