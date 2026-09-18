@@ -483,7 +483,7 @@ fn load_document(
             .collect::<Result<_, _>>()?,
         ref value => return Err(PolicyError::InvalidTopLevel(yaml_shape(value).to_string())),
     };
-    let multiple = mappings.len() > 1;
+    let multiple = matches!(value, serde_yaml::Value::Sequence(_));
     let mut outcome = LoadOutcome::default();
     let mut names = IndexMap::<String, ()>::new();
     for (index, mapping) in mappings.into_iter().enumerate() {
