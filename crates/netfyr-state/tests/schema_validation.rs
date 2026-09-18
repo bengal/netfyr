@@ -908,3 +908,17 @@ fn errors_collected_across_all_fragments() {
         );
     }
 }
+
+/// Adding a base property whose name collides with an existing fragment
+/// trigger key (e.g. `ipv4`, `ethernet`) must be rejected.
+#[test]
+fn base_property_colliding_with_fragment_trigger_is_rejected() {
+    let mut reg = registry();
+    let err = reg
+        .add_schema_node("base", "ipv4", r#"{"type":"string"}"#)
+        .unwrap_err();
+    assert!(
+        err.contains("collides with a fragment trigger key"),
+        "unexpected error: {err}"
+    );
+}

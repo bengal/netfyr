@@ -415,6 +415,25 @@ impl SchemaRegistry {
                 "schema node path must not be empty or contain empty components".to_string(),
             );
         }
+        // Reject base properties that collide with existing fragment triggers.
+        let target_is_base = self
+            .fragments
+            .iter()
+            .find(|f| f.name == fragment)
+            .map_or(false, |f| f.trigger_key.is_none());
+        if target_is_base && parts.len() == 1 {
+            let collides = self
+                .fragments
+                .iter()
+                .any(|f| f.trigger_key == Some(parts[0]));
+            if collides {
+                return Err(format!(
+                    "base property '{}' collides with a fragment trigger key",
+                    parts[0],
+                ));
+            }
+        }
+
         let fragment = self
             .fragments
             .iter_mut()
